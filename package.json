@@ -9,7 +9,8 @@
     "postcss-nth-scion"
   ],
   "scripts": {
-    "test": "jest --coverage && eslint ."
+    "test": "jest --coverage && eslint .",
+    "test:watch": "jest --watch --coverage"
   },
   "author": "George <george@adamson.com>",
   "license": "MIT",
@@ -49,5 +50,8 @@
         "statements": 100
       }
     }
+  },
+  "dependencies": {
+    "postcss-selector-parser": "^6.0.13"
   }
 }

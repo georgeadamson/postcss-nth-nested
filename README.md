@@ -1,18 +1,20 @@
-# postcss-nth-scion
+# postcss-nth-scion(n)
 
 [PostCSS] plugin for :nth-scion(n) descendent depth selector.
 
 [PostCSS]: https://github.com/postcss/postcss
 
 ```css
-.foo {
-  /* Input example */
+/* Input example */
+.menu li:nth-scion(2) {
+  padding: 5px;
 }
 ```
 
 ```css
-.foo {
-  /* Output example */
+/* Output example */
+.menu li:where(li li li):not(.menu li li li li) {
+  padding: 5px;
 }
 ```
 
