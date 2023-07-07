@@ -1,12 +1,12 @@
-# postcss-nth-scion(n)
+# postcss-nth-nested(n)
 
-[PostCSS] plugin for :nth-scion(n) descendent depth selector.
+[PostCSS] plugin for :nth-nested(n) descendent depth selector.
 
 [PostCSS]: https://github.com/postcss/postcss
 
 ```css
 /* Input example */
-.menu li:nth-scion(2) {
+.menu li:nth-nested(2) {
   padding: 5px;
 }
 ```
@@ -18,15 +18,18 @@
 }
 ```
 
+The resulting CSS is compatible with browsers that support [:where()](https://caniuse.com/mdn-css_selectors_where) and :not().
+The deeper the nesting, the longer the syntax.
+
 ## Usage
 
 **Step 1:** Install plugin:
 
 ```sh
-npm install --save-dev postcss postcss-nth-scion
+npm install --save-dev postcss postcss-nth-nested
 ```
 
-**Step 2:** Check you project for existed PostCSS config: `postcss.config.js`
+**Step 2:** Check you project for PostCSS config: `postcss.config.js`
 in the project root, `"postcss"` section in `package.json`
 or `postcss` in bundle config.
 
@@ -38,7 +41,7 @@ and set this plugin in settings.
 ```diff
 module.exports = {
   plugins: [
-+   require('postcss-nth-scion'),
++   require('postcss-nth-nested'),
     require('autoprefixer')
   ]
 }
