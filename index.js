@@ -11,13 +11,13 @@ module.exports = (/* opts = {} */) => {
       root.walkRules(/:nth-nested\((\d+)\)/, (rule) => {
         // Tokenise the selector into the parts we need to produce a valid equivalent selector:
         // Eg: ".foo .bar li:nth-nested(2)" >>> ['.foo .bar li:nth-nested(2)', '.foo .bar', 'li', ':nth-scion(2)', '2']
-        //                             container↓    node↓    pseudo↓    depth↓
+        // Regex parts:                container↓    node↓    pseudo↓    depth↓
         const matches = rule.selector.match(/^(.*?)([^>~+\s]*)(:nth-nested\((\d*)\))/);
         const [, containerSelector = "", nodeSelector = "*", pseudoSelector, depthString] = matches || [];
         const depth = Math.max(0, depthString || 0);
 
-        console.log(rule.selector, matches);
-        console.log({ containerSelector, nodeSelector, pseudoSelector, depth });
+        // console.log(rule.selector, matches);
+        // console.log({ containerSelector, nodeSelector, pseudoSelector, depth });
 
         if (depth < 1) {
           // Zero means don't allow nesting at all, and we can use a less verbose selector:
