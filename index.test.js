@@ -67,6 +67,6 @@ it('should generate selector honouring nested nth-nested selectors. #silly!', as
 })
 
 it('should generate selector no more than 99 deep', async () => {
-  await run('li:nth-nested(100) { }', 'li:nth-nested(100) { }');
-  await run('li:nth-nested(99) { }', 'li:where(li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li):not(li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li li) { }');
+  await run('li:nth-nested(100) { }', 'li:nth-nested(100) { }'); // Over 99 deliberately ignored
+  await run('li:nth-nested(99) { }', `li:where(${'li '.repeat(100).trim()}):not(${'li '.repeat(101).trim()}) { }`);
 })
