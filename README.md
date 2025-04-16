@@ -1,4 +1,4 @@
-# postcss-nth-nested(n)
+# postcss-nth-nested
 
 [PostCSS] plugin for :nth-nested(n) descendent depth selector.
 
@@ -29,14 +29,14 @@ The deeper the nesting, the longer the syntax.
 npm install --save-dev postcss postcss-nth-nested
 ```
 
-**Step 2:** Check you project for PostCSS config: `postcss.config.js`
+**Step 2:** Check your project for PostCSS config: `postcss.config.js`
 in the project root, `"postcss"` section in `package.json`
 or `postcss` in bundle config.
 
 If you do not use PostCSS, add it according to [official docs]
 and set this plugin in settings.
 
-**Step 3:** Add the plugin to plugins list:
+**Step 3:** Add the plugin to your plugins list:
 
 ```diff
 module.exports = {
