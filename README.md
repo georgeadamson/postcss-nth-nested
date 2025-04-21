@@ -11,10 +11,18 @@ Eg:
 
 This plugin rewrites the selector using `:where` and `:not` to something much more verbose but well supported:
 
-Examples:
+## Examples:
 
 `li:nth-nested(2) > .text { background-color: lime }`
 
 becomes...
 
 `li:where(li li):not(li li li) > span { background-color: lime }`
+
+---
+
+`div.foo:nth-nested(4) > p { margin: 0 }`
+
+becomes...
+
+`div.foo:where(div.foo div.foo div.foo div.foo):not(div.foo div.foo div.foo div.foo div.foo) > p { margin: 0 }`
