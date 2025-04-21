@@ -1,0 +1,87 @@
+<html>
+    <head>
+        <script>var module = {}</script>
+        <script type="module">
+            // Import inspired by https://github.com/postcss/postcss/issues/830#issuecomment-732688585
+            import postcss from 'https://jspm.dev/postcss@8.1.10';
+            import '/index.js';
+            var plugin = module.exports;
+
+            console.log(postcss, plugin);
+
+            // Default css:
+            var css = `li:nth-nested(2) > span { background-color: lime }`;
+
+            // Process the css:
+            var resultCss = await postcss([plugin]).process(css, { from:undefined });
+            console.log(resultCss.css);
+
+            // Inject css into the page:
+            var styleTag = document.createElement('style');
+            styleTag.innerText = resultCss;
+            document.head.appendChild(styleTag);
+            document.querySelector('output').innerText = resultCss.css;
+
+            window.onChange = async function(){
+                var input = window.event.target;
+                var css = input.value;
+
+                // Process the css:
+                var resultCss = await postcss([plugin]).process(css, { from:undefined });
+                styleTag.innerText = resultCss.css;
+                document.querySelector('output').innerText = resultCss.css;
+                console.log(resultCss.css)
+            }
+        </script>
+    </head>
+    <body>
+        <textarea rows="4" cols="80" oninput="onChange()">li:nth-nested(2) > .text { background-color: lime }</textarea>
+        <br/>
+        <label>Generated CSS: <code><output></output></code></label>
+        <br/>
+        <br/>
+        <div class="container1">
+            .container1
+            <ul><li class="item one">
+                <span class="text">Depth 1</span>
+                <ul><li class="item two">
+                    <span class="text">Depth 2</span>
+                    <ul><li class="item three">
+                        <span class="text">Depth 3</span>
+                        <ul><li class="item four">
+                            <span class="text">Depth 4</span>
+                            <ul><li class="item five">
+                                <span class="text">Depth 5</span>
+                                <ul><li class="item six">
+                                    <span class="text">Depth 6</span>
+                                </li></ul>
+                            </li></ul>
+                        </li></ul>
+                    </li></ul>
+                </li></ul>
+            </li></ul>
+        </div>
+
+        <div class="container2">
+            .container2
+            <ul><li class="item">
+                <span class="text">Depth 1</span>
+                <ul><li class="item">
+                    <span class="text">Depth 2</span>
+                    <ul><li class="item">
+                        <span class="text">Depth 3</span>
+                        <ul><li class="item">
+                            <span class="text">Depth 4</span>
+                            <ul><li class="item">
+                                <span class="text">Depth 5</span>
+                                <ul><li class="item">
+                                    <span class="text">Depth 6</span>
+                                </li></ul>
+                            </li></ul>
+                        </li></ul>
+                    </li></ul>
+                </li></ul>
+            </li></ul>
+        </div>
+    </body>
+</html>

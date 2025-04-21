@@ -1,0 +1,58 @@
+{
+  "name": "postcss-nth-nested",
+  "version": "0.0.1",
+  "description": "PostCSS plugin for :nth-nested(n) descendent depth selector",
+  "keywords": [
+    "postcss",
+    "css",
+    "postcss-plugin",
+    "postcss-nth-nested",
+    "children"
+  ],
+  "scripts": {
+    "test": "jest --coverage && eslint .",
+    "test:watch": "jest --watch --coverage"
+  },
+  "author": "George Adamson https://github.com/georgeadamson",
+  "license": "MIT",
+  "repository": "georgeadamson/postcss-nth-nested",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "peerDependencies": {
+    "postcss": "^8.3.0"
+  },
+  "devDependencies": {
+    "clean-publish": "^3.4.2",
+    "eslint": "^8.0.1",
+    "eslint-plugin-jest": "^25.2.2",
+    "jest": "^27.3.1",
+    "postcss": "^8.3.11"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 2017
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:jest/recommended"
+    ],
+    "rules": {
+      "jest/expect-expect": "off"
+    }
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "statements": 100
+      }
+    }
+  },
+  "dependencies": {
+    "postcss-selector-parser": "^6.0.13"
+  }
+}
