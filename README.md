@@ -17,7 +17,7 @@ This plugin rewrites the selector using `:where` and `:not` to something much mo
 
 becomes...
 
-`li:where(li li):not(li li li) > span { background-color: lime }`
+`li:where(li li):not(li li li) > .text { background-color: lime }`
 
 ---
 
