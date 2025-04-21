@@ -13,7 +13,7 @@ module.exports = (/* opts = {} */) => {
   return {
     postcssPlugin: 'postcss-nth-nested',
 
-    Root (root /*, postcss */) {
+    Once(root /*, postcss */) {
       root.walkRules(reMatchSelector, (rule) => {
         let recursionLimit = 5; // Abitrary limit just to protect from multiple nth-nested stupidity
 
@@ -22,24 +22,24 @@ module.exports = (/* opts = {} */) => {
           // Eg: ".foo .bar li:nth-nested(2)" >>> ['.foo .bar li:nth-nested(2)', '.foo .bar', 'li', ':nth-nested(2)', '2']
           const matches = rule.selector.match(reTokeniseSelector);
           const [, containerSelector, nodeSelector, pseudoSelector, depthString] = matches;
-          const depth = Math.max(0, depthString);
+          const depth = parseInt(depthString);
 
-          console.log(rule.selector, nodeSelector);
           // console.log({ containerSelector, nodeSelector, pseudoSelector, depth });
 
-          if (depth < 1) {
-            // Zero means don't allow nesting at all, so we can generate a less verbose selector:
-            const oneLevelTooDeepSelector = `${nodeSelector || "*"} `.repeat(2).trim();
-            const tooDeepInContainer = `${containerSelector.trim()} ${oneLevelTooDeepSelector}`.trim();
-            rule.selector = rule.selector.replace(pseudoSelector, `:not(${tooDeepInContainer})`);
-          } else {
-            const correctDepthSelector = `${nodeSelector || "*"} `.repeat(depth + 1);
-            const oneLevelTooDeepSelector = `${nodeSelector || "*"} `.repeat(depth + 2);
+          if (depth > 1) {
+            const correctDepthSelector = `${nodeSelector || "*"} `.repeat(depth);
+            const oneLevelTooDeepSelector = `${nodeSelector || "*"} `.repeat(depth + 1);
 
             const correctDepthInContainer = `${containerSelector.trim()} ${correctDepthSelector}`.trim();
             const tooDeepInContainer = `${containerSelector.trim()} ${oneLevelTooDeepSelector}`.trim();
-            const validNestedSelectorSyntax = `:where(${correctDepthInContainer}):not(${tooDeepInContainer})`;
-            rule.selector = rule.selector.replace(pseudoSelector, validNestedSelectorSyntax);
+            const finalVerboseSelector = `:where(${correctDepthInContainer}):not(${tooDeepInContainer})`;
+            rule.selector = rule.selector.replace(pseudoSelector, finalVerboseSelector);
+          }
+          else if (depth === 1) {
+            // One means don't allow nesting at all, so we can generate a less verbose selector:
+            const oneLevelTooDeepSelector = `${nodeSelector || "*"} `.repeat(2).trim();
+            const tooDeepInContainer = `${containerSelector.trim()} ${oneLevelTooDeepSelector}`.trim();
+            rule.selector = rule.selector.replace(pseudoSelector, `:not(${tooDeepInContainer})`);
           }
         }
       });
