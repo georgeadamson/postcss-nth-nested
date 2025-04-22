@@ -2,16 +2,20 @@
 
 PostCSS plugin to handle a custom `:nth-nested(n)` descendent depth selector syntax.
 
+For selecting elements by their depth in the DOM. This is not the same as [CSS Nesting](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting).
+
 Eg:
 
-- `li:nth-nested(2)` would select the `<li>` that is two levels deep in a nested list.
-- `.foo:nth-nested(4)` would select any `.foo` element that has three `.foo` ancestors above it in the DOM.
+- `li:nth-nested(2)` would select the `<li>` that is 2 levels deep in a nested list.
+- `.foo:nth-nested(4)` would select any `.foo` element that has 3 `.foo` ancestors above it in the DOM.
 
-### How does it work?
+## How does it work?
 
 This plugin rewrites the selector using `:where` and `:not` to something much more verbose but well supported:
 
-## Examples:
+### Examples:
+
+Selector for nested elements by tag name...
 
 `li:nth-nested(2) > .text { background-color: lime }`
 
@@ -21,8 +25,12 @@ becomes...
 
 ---
 
+Selector for nested elements by classname...
+
 `div.foo:nth-nested(4) > p { margin: 0 }`
 
 becomes...
 
 `div.foo:where(div.foo div.foo div.foo div.foo):not(div.foo div.foo div.foo div.foo div.foo) > p { margin: 0 }`
+
+☝️ This is interesting and open to debate because it [has to] behave differently from the `nth-child()` selector to be useful. Arguably there's room for more explicit selctors like`nth-nested-child()` and `nth-nested-of-type()` that would match elements in a similar way to the established `nth-` selectors.
