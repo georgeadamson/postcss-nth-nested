@@ -2,12 +2,65 @@
 
 PostCSS plugin to handle a custom `:nth-nested(n)` descendent depth selector syntax.
 
-For selecting elements by their depth in the DOM. This is not the same as [CSS Nesting](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting).
+## Installation
+
+```bash
+npm install postcss-nth-nested --save-dev
+```
+
+## Usage
+
+Add it to your PostCSS config:
+
+```js
+// CommonJS
+module.exports = {
+  plugins: [require("postcss-nth-nested")],
+};
+
+// ES Modules
+export default {
+  plugins: [(await import("postcss-nth-nested")).default],
+};
+```
+
+## What it does
+
+Use this to select elements by their depth in the DOM. This is not the same as [CSS Nested Rules](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting).
 
 Eg:
 
-- `li:nth-nested(2)` would select the `<li>` that is 2 levels deep in a nested list.
-- `.foo:nth-nested(4)` would select any `.foo` element that has 3 `.foo` ancestors above it in the DOM.
+- `li:nth-nested(2)` will select the `<li>` that is 2 levels deep in a nested list:
+
+  ```html
+  <ul>
+    <li>
+      <ul>
+        <li>
+          This one
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  ```
+
+- `.foo:nth-nested(3)` will select any `.foo` element that is 3 levels deep, i.e. it has 2 `.foo` ancestors above it in the DOM:
+  ```html
+  <ul>
+    <li>
+      <ul class="foo">
+        <li class="foo">
+          <ul>
+            <li class="foo">This one</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  ```
 
 ## How does it work?
 
