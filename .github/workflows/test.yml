@@ -24,9 +24,8 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 14
-          - 12
-          - 10
+          - 20
+          - 15
     name: Node.js ${{ matrix.node-version }} Quick
     steps:
       - name: Checkout the repository
