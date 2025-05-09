@@ -2,6 +2,8 @@
 
 PostCSS plugin to handle a custom `:nth-nested(n)` descendent depth selector syntax.
 
+[Demo](https://codepen.io/georgeadamson/pen/QWJyjRv) on Codepen.
+
 ## Installation
 
 ```bash
