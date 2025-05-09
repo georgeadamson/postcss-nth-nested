@@ -1,6 +1,6 @@
 {
   "name": "postcss-nth-nested",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "PostCSS plugin for :nth-nested(n) descendent depth selector to select elements by their depth in the DOM",
   "main": "index.js",
   "files": [
