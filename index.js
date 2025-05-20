@@ -37,8 +37,8 @@ module.exports = (/* opts = {} */) => {
           }
           else if (depth === 1) {
             // One means don't allow nesting at all, so we can generate a less verbose selector:
-            const oneLevelTooDeepSelector = `${nodeSelector || "*"} `.repeat(2).trim();
-            const tooDeepInContainer = `${containerSelector.trim()} ${oneLevelTooDeepSelector}`.trim();
+            const oneLevelTooDeepSelector = ` ${nodeSelector || "*"}`.repeat(2);
+            const tooDeepInContainer = `${containerSelector.trim()}${oneLevelTooDeepSelector}`.trim();
             rule.selector = rule.selector.replace(pseudoSelector, `:not(${tooDeepInContainer})`);
           }
         }
