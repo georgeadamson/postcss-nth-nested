@@ -1,8 +1,66 @@
-// Regex to match valid :nth-nested(n) selector: (With arbitrary limit of :nth-nested(99))
-const reMatchSelector = /:nth-nested\((\d{1,2})\)/;
+const selectorParser = require('postcss-selector-parser');
 
-// Regex parts:       container↓    node↓    pseudo↓    depth↓
-const reTokeniseSelector = /^(.*?)([^>~+\s]*)(:nth-nested\((\d*)\))/;
+const NTH_NESTED_PSEUDO = ':nth-nested';
+const MAX_DEPTH = 99;
+const RECURSION_LIMIT = 5;
+
+function getNthNestedDepth(pseudo) {
+  if (pseudo.value !== NTH_NESTED_PSEUDO || pseudo.nodes.length !== 1) {
+    return null;
+  }
+
+  const depthString = pseudo.nodes[0].toString();
+  const depth = parseInt(depthString);
+
+  if (!/^\d{1,2}$/.test(depthString) || depth < 1 || depth > MAX_DEPTH) {
+    return null;
+  }
+
+  return depth;
+}
+
+function stringifyNodes(nodes) {
+  return nodes.map((node) => node.toString()).join('').trim();
+}
+
+function getNodeSelector(selector, pseudoIndex) {
+  const nodeStartIndex = selector.nodes
+    .slice(0, pseudoIndex)
+    .map((node) => node.type)
+    .lastIndexOf('combinator') + 1;
+
+  return {
+    containerSelector: stringifyNodes(selector.nodes.slice(0, nodeStartIndex)),
+    nodeSelector: stringifyNodes(selector.nodes.slice(nodeStartIndex, pseudoIndex))
+  };
+}
+
+function buildReplacementSelector(containerSelector, nodeSelector, depth) {
+  const node = nodeSelector || '*';
+
+  if (depth > 1) {
+    const correctDepthSelector = `${node} `.repeat(depth);
+    const oneLevelTooDeepSelector = `${node} `.repeat(depth + 1);
+
+    const correctDepthInContainer = `${containerSelector} ${correctDepthSelector}`.trim();
+    const tooDeepInContainer = `${containerSelector} ${oneLevelTooDeepSelector}`.trim();
+
+    return `:where(${correctDepthInContainer}):not(${tooDeepInContainer})`;
+  }
+
+  const oneLevelTooDeepSelector = ` ${node}`.repeat(2);
+  const tooDeepInContainer = `${containerSelector}${oneLevelTooDeepSelector}`.trim();
+
+  return `:not(${tooDeepInContainer})`;
+}
+
+function parseReplacementNodes(replacementSelector) {
+  return selectorParser()
+    .astSync(replacementSelector)
+    .nodes[0]
+    .nodes
+    .map((node) => node.clone());
+}
 
 /**
  * @type {import('postcss').PluginCreator}
@@ -14,33 +72,38 @@ module.exports = (/* opts = {} */) => {
     postcssPlugin: 'postcss-nth-nested',
 
     Once(root /*, postcss */) {
-      root.walkRules(reMatchSelector, (rule) => {
-        let recursionLimit = 5; // Abitrary limit just to protect from multiple nth-nested stupidity
+      root.walkRules((rule) => {
+        if (!rule.selector.includes(NTH_NESTED_PSEUDO)) {
+          return;
+        }
 
-        while (reMatchSelector.test(rule.selector) && recursionLimit--) {
-          // Tokenise the selector into the parts we need to produce a valid equivalent selector:
-          // Eg: ".foo .bar li:nth-nested(2)" >>> ['.foo .bar li:nth-nested(2)', '.foo .bar', 'li', ':nth-nested(2)', '2']
-          const matches = rule.selector.match(reTokeniseSelector);
-          const [, containerSelector, nodeSelector, pseudoSelector, depthString] = matches;
-          const depth = parseInt(depthString);
+        let remainingReplacements = RECURSION_LIMIT;
+        let didReplace = false;
 
-          // console.log({ containerSelector, nodeSelector, pseudoSelector, depth });
+        const transformedSelector = selectorParser((selectors) => {
+          selectors.each((selector) => {
+            for (let index = 0; index < selector.nodes.length && remainingReplacements; index++) {
+              const node = selector.nodes[index];
+              const depth = node.type === 'pseudo' ? getNthNestedDepth(node) : null;
 
-          if (depth > 1) {
-            const correctDepthSelector = `${nodeSelector || "*"} `.repeat(depth);
-            const oneLevelTooDeepSelector = `${nodeSelector || "*"} `.repeat(depth + 1);
+              if (!depth) {
+                continue;
+              }
 
-            const correctDepthInContainer = `${containerSelector.trim()} ${correctDepthSelector}`.trim();
-            const tooDeepInContainer = `${containerSelector.trim()} ${oneLevelTooDeepSelector}`.trim();
-            const finalVerboseSelector = `:where(${correctDepthInContainer}):not(${tooDeepInContainer})`;
-            rule.selector = rule.selector.replace(pseudoSelector, finalVerboseSelector);
-          }
-          else if (depth === 1) {
-            // One means don't allow nesting at all, so we can generate a less verbose selector:
-            const oneLevelTooDeepSelector = ` ${nodeSelector || "*"}`.repeat(2);
-            const tooDeepInContainer = `${containerSelector.trim()}${oneLevelTooDeepSelector}`.trim();
-            rule.selector = rule.selector.replace(pseudoSelector, `:not(${tooDeepInContainer})`);
-          }
+              const { containerSelector, nodeSelector } = getNodeSelector(selector, index);
+              const replacementSelector = buildReplacementSelector(containerSelector, nodeSelector, depth);
+              const replacementNodes = parseReplacementNodes(replacementSelector);
+
+              node.replaceWith(...replacementNodes);
+              didReplace = true;
+              remainingReplacements--;
+              index += replacementNodes.length - 1;
+            }
+          });
+        }).processSync(rule.selector);
+
+        if (didReplace) {
+          rule.selector = transformedSelector;
         }
       });
     }

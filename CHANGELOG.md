@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- Refactored selector transformation to use `postcss-selector-parser` instead of ad hoc regular-expression selector tokenization.
+
+### Fixed
+
+- Fixed the browser demo after the selector-parser refactor by loading `postcss-selector-parser` from JSPM and exposing it to the CommonJS plugin through a small `require` shim.
+- Fixed selector-list handling so only the selector containing `:nth-nested(...)` contributes to generated depth selectors.
+- Fixed selectors containing spaces inside attribute values or functional pseudo selectors.
+- Left nested `:nth-nested(...)` usage inside other pseudo selectors unchanged instead of generating invalid CSS.
+
 ## [1.0.3] - 2025-05-20
 
 ### Changed

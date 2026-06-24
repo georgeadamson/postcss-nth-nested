@@ -1,16 +1,26 @@
 <html>
     <head>
-        <script>var module = {}</script>
         <script type="module">
             // Import inspired by https://github.com/postcss/postcss/issues/830#issuecomment-732688585
             import postcss from 'https://jspm.dev/postcss@8.1.10';
-            import '/index.js';
-            var plugin = module.exports;
+            import selectorParser from 'https://jspm.dev/postcss-selector-parser@6.0.13';
+
+            globalThis.module = { exports: {} };
+            globalThis.require = function(packageName) {
+                if (packageName === 'postcss-selector-parser') {
+                    return selectorParser;
+                }
+
+                throw new Error(`Cannot require "${packageName}" in the browser demo`);
+            };
+
+            await import('./index.js');
+            var plugin = globalThis.module.exports;
 
             console.log(postcss, plugin);
 
             // Default css:
-            var css = `li:nth-nested(2) > span { background-color: lime }`;
+            var css = `li.item:nth-nested(2) > span { background-color: lime }`;
 
             // Process the css:
             var resultCss = await postcss([plugin]).process(css, { from:undefined });
@@ -18,12 +28,12 @@
 
             // Inject css into the page:
             var styleTag = document.createElement('style');
-            styleTag.innerText = resultCss;
+            styleTag.innerText = resultCss.css;
             document.head.appendChild(styleTag);
             document.querySelector('output').innerText = resultCss.css;
 
-            window.onChange = async function(){
-                var input = window.event.target;
+            window.onChange = async function(event){
+                var input = event.target;
                 var css = input.value;
 
                 // Process the css:
@@ -35,7 +45,7 @@
         </script>
     </head>
     <body>
-        <textarea rows="4" cols="80" oninput="onChange()">li:nth-nested(2) > .text { background-color: lime }</textarea>
+        <textarea rows="4" cols="80" oninput="onChange(event)">li.item:nth-nested(2) > .text { background-color: lime }</textarea>
         <br/>
         <label>Generated CSS: <code><output></output></code></label>
         <br/>
