@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [1.1.2] - 2026-06-24
+## [1.1.3] - 2026-06-24
 
 ### Changed
 
+- Split the browser demo styles into `index.css`.
+- Improved the browser demo with a live editor, generated CSS output, example selectors, error status, and clearer nested preview markup.
+- Adjusted demo presets so the tag-plus-class and wildcard examples visibly match the preview markup.
 - Updated package metadata for publication, normalized the repository metadata, and included the changelog in the npm package.
 
 ## [1.1.1] - 2026-06-24

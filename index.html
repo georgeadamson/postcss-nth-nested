@@ -1,5 +1,10 @@
-<html>
+<!doctype html>
+<html lang="en">
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>postcss-nth-nested demo</title>
+        <link rel="stylesheet" href="./index.css">
         <script type="module">
             // Import inspired by https://github.com/postcss/postcss/issues/830#issuecomment-732688585
             import postcss from 'https://jspm.dev/postcss@8.1.10';
@@ -15,83 +20,189 @@
             };
 
             await import('./index.js');
-            var plugin = globalThis.module.exports;
 
-            console.log(postcss, plugin);
+            const plugin = globalThis.module.exports;
+            const initialCss = `li:nth-nested(2) > .text {
+  background-color: #c8f35a;
+  border-color: #779a20;
+  color: #1d2b0f;
+}`;
+            const examples = {
+                'depth-1': `li:nth-nested(1) > .text {
+  background-color: #ffffff;
+  border-color: #d9603f;
+  color: #9e351f;
+}`,
+                'depth-2': initialCss,
+                'depth-3': `li:nth-nested(3) > .text {
+  background-color: #d8c8ff;
+  border-color: #7b4cc2;
+  color: #36205e;
+}`,
+                'container': `.container2 li.item:nth-nested(4) > .text {
+  background-color: #bdeee8;
+  border-color: #16736b;
+  color: #0c514c;
+}`,
+                'classes': `li.item:nth-nested(3) > .text {
+  background-color: #ffd9c9;
+  border-color: #d9603f;
+  color: #7a2b18;
+}`,
+                'wildcard': `.container2 :nth-nested(6) > .text {
+  outline: 3px solid #16736b;
+  outline-offset: 2px;
+}`
+            };
 
-            // Default css:
-            var css = `li.item:nth-nested(2) > span { background-color: lime }`;
-
-            // Process the css:
-            var resultCss = await postcss([plugin]).process(css, { from:undefined });
-            console.log(resultCss.css);
-
-            // Inject css into the page:
-            var styleTag = document.createElement('style');
-            styleTag.innerText = resultCss.css;
+            const styleTag = document.createElement('style');
             document.head.appendChild(styleTag);
-            document.querySelector('output').innerText = resultCss.css;
 
-            window.onChange = async function(event){
-                var input = event.target;
-                var css = input.value;
+            function setStatus(message, isError) {
+                const status = document.querySelector('[data-status]');
+                status.textContent = message;
+                status.classList.toggle('error', Boolean(isError));
+            }
 
-                // Process the css:
-                var resultCss = await postcss([plugin]).process(css, { from:undefined });
-                styleTag.innerText = resultCss.css;
-                document.querySelector('output').innerText = resultCss.css;
-                console.log(resultCss.css)
+            async function processCss(css) {
+                const output = document.querySelector('[data-output]');
+
+                try {
+                    const result = await postcss([plugin()]).process(css, { from: undefined });
+                    styleTag.textContent = result.css;
+                    output.textContent = result.css;
+                    setStatus('Generated CSS is live', false);
+                }
+                catch (error) {
+                    styleTag.textContent = '';
+                    output.textContent = error.message;
+                    setStatus('CSS could not be processed', true);
+                }
+            }
+
+            function initDemo() {
+                const input = document.querySelector('[data-input]');
+                input.value = initialCss;
+                processCss(input.value);
+
+                input.addEventListener('input', () => {
+                    processCss(input.value);
+                });
+
+                document.querySelectorAll('[data-example]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        input.value = examples[button.dataset.example];
+                        input.focus();
+                        processCss(input.value);
+                    });
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                window.addEventListener('DOMContentLoaded', initDemo);
+            }
+            else {
+                initDemo();
             }
         </script>
     </head>
     <body>
-        <textarea rows="4" cols="80" oninput="onChange(event)">li.item:nth-nested(2) > .text { background-color: lime }</textarea>
-        <br/>
-        <label>Generated CSS: <code><output></output></code></label>
-        <br/>
-        <br/>
-        <div class="container1">
-            .container1
-            <ul><li class="item one">
-                <span class="text">Depth 1</span>
-                <ul><li class="item two">
-                    <span class="text">Depth 2</span>
-                    <ul><li class="item three">
-                        <span class="text">Depth 3</span>
-                        <ul><li class="item four">
-                            <span class="text">Depth 4</span>
-                            <ul><li class="item five">
-                                <span class="text">Depth 5</span>
-                                <ul><li class="item six">
-                                    <span class="text">Depth 6</span>
-                                </li></ul>
-                            </li></ul>
-                        </li></ul>
-                    </li></ul>
-                </li></ul>
-            </li></ul>
-        </div>
+        <main class="app">
+            <div class="shell">
+                <header class="header">
+                    <div>
+                        <h1>postcss-nth-nested</h1>
+                        <p class="subtitle">A PostCSS playground for transforming <code>:nth-nested(n)</code> into CSS selectors that target exact nesting depth.</p>
+                    </div>
+                    <div class="meta" aria-label="Package details">
+                        <span class="pill">PostCSS 8</span>
+                        <span class="pill">Depth 1-99</span>
+                        <span class="pill">Build-time transform</span>
+                    </div>
+                </header>
 
-        <div class="container2">
-            .container2
-            <ul><li class="item">
-                <span class="text">Depth 1</span>
-                <ul><li class="item">
-                    <span class="text">Depth 2</span>
-                    <ul><li class="item">
-                        <span class="text">Depth 3</span>
-                        <ul><li class="item">
-                            <span class="text">Depth 4</span>
-                            <ul><li class="item">
-                                <span class="text">Depth 5</span>
-                                <ul><li class="item">
-                                    <span class="text">Depth 6</span>
-                                </li></ul>
-                            </li></ul>
-                        </li></ul>
-                    </li></ul>
-                </li></ul>
-            </li></ul>
-        </div>
+                <section class="workspace" aria-label="CSS playground">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Source CSS</h2>
+                            <p class="note">Edit the selector or choose an example.</p>
+                        </div>
+                        <div class="examples" aria-label="Examples">
+                            <button class="example-button" type="button" data-example="depth-1">Depth 1</button>
+                            <button class="example-button" type="button" data-example="depth-2">Depth 2</button>
+                            <button class="example-button" type="button" data-example="depth-3">Depth 3</button>
+                            <button class="example-button" type="button" data-example="container">Container</button>
+                            <button class="example-button" type="button" data-example="classes">Tag + class</button>
+                            <button class="example-button" type="button" data-example="wildcard">Wildcard scope</button>
+                        </div>
+                        <textarea class="editor" spellcheck="false" data-input aria-label="Source CSS"></textarea>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Generated CSS</h2>
+                            <span class="status" data-status aria-live="polite">Loading plugin</span>
+                        </div>
+                        <pre class="output"><code data-output></code></pre>
+                    </div>
+                </section>
+
+                <section class="preview" aria-label="Live preview">
+                    <div class="preview-header">
+                        <h2 class="panel-title">Live preview</h2>
+                        <p class="note">The generated CSS is injected into this nested markup.</p>
+                    </div>
+                    <div class="preview-grid">
+                        <div class="preview-column container1">
+                            <p class="preview-label">container1: depth classes</p>
+                            <ul class="tree">
+                                <li class="item one">
+                                    <span class="text">Depth <span class="depth">1</span></span>
+                                    <ul><li class="item two">
+                                        <span class="text">Depth <span class="depth">2</span></span>
+                                        <ul><li class="item three">
+                                            <span class="text">Depth <span class="depth">3</span></span>
+                                            <ul><li class="item four">
+                                                <span class="text">Depth <span class="depth">4</span></span>
+                                                <ul><li class="item five">
+                                                    <span class="text">Depth <span class="depth">5</span></span>
+                                                    <ul><li class="item six">
+                                                        <span class="text">Depth <span class="depth">6</span></span>
+                                                    </li></ul>
+                                                </li></ul>
+                                            </li></ul>
+                                        </li></ul>
+                                    </li></ul>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="preview-column container2">
+                            <p class="preview-label">container2: repeated item class</p>
+                            <ul class="tree">
+                                <li class="item">
+                                    <span class="text">Depth <span class="depth">1</span></span>
+                                    <ul><li class="item">
+                                        <span class="text">Depth <span class="depth">2</span></span>
+                                        <ul><li class="item">
+                                            <span class="text">Depth <span class="depth">3</span></span>
+                                            <ul><li class="item">
+                                                <span class="text">Depth <span class="depth">4</span></span>
+                                                <ul><li class="item">
+                                                    <span class="text">Depth <span class="depth">5</span></span>
+                                                    <ul><li class="item">
+                                                        <span class="text">Depth <span class="depth">6</span></span>
+                                                    </li></ul>
+                                                </li></ul>
+                                            </li></ul>
+                                        </li></ul>
+                                    </li></ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
     </body>
 </html>
