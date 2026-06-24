@@ -1,9 +1,10 @@
 {
   "name": "postcss-nth-nested",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "PostCSS plugin for :nth-nested(n) descendent depth selector to select elements by their depth in the DOM",
   "main": "index.js",
   "files": [
+    "CHANGELOG.md",
     "index.js"
   ],
   "keywords": [
@@ -11,7 +12,17 @@
     "css",
     "postcss-plugin",
     "postcss-nth-nested",
-    "children"
+    "css-selectors",
+    "selector",
+    "custom-selector",
+    "nth",
+    "nth-nested",
+    "nested",
+    "nested-lists",
+    "depth",
+    "dom-depth",
+    "tree",
+    "menu"
   ],
   "scripts": {
     "test": "jest --coverage && eslint .",
@@ -20,7 +31,10 @@
   },
   "author": "George Adamson https://github.com/georgeadamson",
   "license": "MIT",
-  "repository": "georgeadamson/postcss-nth-nested",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/georgeadamson/postcss-nth-nested.git"
+  },
   "engines": {
     "node": ">=15.0.0"
   },

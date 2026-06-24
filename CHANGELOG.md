@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] - 2026-06-24
+
+### Changed
+
+- Updated package metadata for publication, normalized the repository metadata, and included the changelog in the npm package.
+
 ## [1.1.1] - 2026-06-24
 
 ### Changed
 
 - Reworked the README to explain the selector purpose, depth semantics, installation, PostCSS configuration, examples, supported syntax, and browser support.
+- Updated npm keywords to improve discoverability for selector, nesting, and depth-related searches.
 
 ## [1.1.0] - 2026-06-24
 
