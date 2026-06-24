@@ -46,6 +46,30 @@ it('should generate selector n deep in container selector', async () => {
   await run('.foo ul .item:nth-nested(2) { }', '.foo ul .item:where(.foo ul .item .item):not(.foo ul .item .item .item) { }');
 })
 
+it('should generate selector independently within selector lists', async () => {
+  await run('a, li:nth-nested(2) { }', 'a, li:where(li li):not(li li li) { }');
+  await run('li:nth-nested(2), .foo { }', 'li:where(li li):not(li li li), .foo { }');
+})
+
+it('should preserve other rules when processing multiple rules', async () => {
+  await run('li:nth-nested(2) { color: red }\na { color: blue }', 'li:where(li li):not(li li li) { color: red }\na { color: blue }');
+})
+
+it('should generate selector when other pseudo selectors are present', async () => {
+  await run('.foo:is(.bar, .baz) li:nth-nested(2) { }', '.foo:is(.bar, .baz) li:where(.foo:is(.bar, .baz) li li):not(.foo:is(.bar, .baz) li li li) { }');
+  await run('li:nth-nested(2):hover { }', 'li:where(li li):not(li li li):hover { }');
+  await run('li:hover:nth-nested(2) { }', 'li:hover:where(li:hover li:hover):not(li:hover li:hover li:hover) { }');
+})
+
+it('should generate selector for node selectors containing spaces inside syntax', async () => {
+  await run('li[data-label="A B"]:nth-nested(2) { }', 'li[data-label="A B"]:where(li[data-label="A B"] li[data-label="A B"]):not(li[data-label="A B"] li[data-label="A B"] li[data-label="A B"]) { }');
+  await run('.foo:is(.bar, .baz):nth-nested(2) { }', '.foo:is(.bar, .baz):where(.foo:is(.bar, .baz) .foo:is(.bar, .baz)):not(.foo:is(.bar, .baz) .foo:is(.bar, .baz) .foo:is(.bar, .baz)) { }');
+})
+
+it('should not generate selector when nth-nested is inside another pseudo selector', async () => {
+  await run(':not(:nth-nested(2)) { }', ':not(:nth-nested(2)) { }');
+})
+
 it('should generate selector honouring child selectors', async () => {
   await run('.foo>li:nth-nested(2) { }', '.foo>li:where(.foo> li li):not(.foo> li li li) { }');
   await run('.foo> li:nth-nested(2) { }', '.foo> li:where(.foo> li li):not(.foo> li li li) { }');
