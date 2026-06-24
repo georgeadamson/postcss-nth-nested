@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.1.0] - 2026-06-24
 
 ### Changed
 
 - Refactored selector transformation to use `postcss-selector-parser` instead of ad hoc regular-expression selector tokenization.
+- Added regression coverage for selector lists, multiple rules, additional pseudo selectors, spaces inside selector syntax, and nested `:nth-nested(...)` usage inside other pseudo selectors.
 
 ### Fixed
 
