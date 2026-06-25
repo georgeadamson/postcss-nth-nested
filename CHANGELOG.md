@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Updated runtime and development dependencies to their latest npm versions.
+- Migrated ESLint configuration to the flat config format required by ESLint 10.
 - Split the browser demo styles into `index.css`.
 - Improved the browser demo with a live editor, generated CSS output, example selectors, error status, and clearer nested preview markup.
 - Adjusted demo presets so the tag-plus-class and wildcard examples visibly match the preview markup.
