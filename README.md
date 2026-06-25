@@ -16,7 +16,9 @@ li:where(li li):not(li li li) > .text {
 }
 ```
 
-[Try the demo on CodePen](https://codepen.io/georgeadamson/pen/QWJyjRv).
+Try the [Demo](https://georgeadamson.github.io/postcss-nth-nested/).
+
+Or tinker with the [demo on CodePen](https://codepen.io/georgeadamson/pen/QWJyjRv).
 
 ## When to use it
 
