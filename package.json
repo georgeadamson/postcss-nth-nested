@@ -27,7 +27,8 @@
   "scripts": {
     "test": "jest --coverage && eslint .",
     "test:watch": "jest --watch --coverage",
-    "prepublishOnly": "npm test"
+    "bump": "npm version patch && git push",
+    "prepublishOnly": "npm test && npm run bump"
   },
   "author": "George Adamson https://github.com/georgeadamson",
   "license": "MIT",
