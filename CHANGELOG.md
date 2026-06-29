@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Added support for `:nth-child(...)`-style `An+B` syntax in `:nth-nested(...)`, including `odd`, `even`, positive formulas, and finite negative formulas.
+- Added a `maxDepth` option for overriding the default generated selector depth cap.
 - Added browser demo presets for odd depths and the first three nesting depths.
 
 ### Changed

@@ -2,6 +2,8 @@ const postcss = require('postcss')
 
 const plugin = require('./')
 
+const { DEFAULT_MAX_DEPTH } = plugin;
+
 async function run (input, output, opts = {}) {
   let result = await postcss([plugin(opts)]).process(input, { from: undefined })
   expect(result.css).toEqual(output)
@@ -52,7 +54,7 @@ it('should not generate selector when syntax looks invalid', async () => {
   await run('li:nth-nested(1 ) { }', 'li:nth-nested(1 ) { }');
   await run('li:nth-nested (1) { }', 'li:nth-nested (1) { }');
   await run('li:nth-nested(-1) { }', 'li:nth-nested(-1) { }');
-  await run('li:nth-nested(n+100) { }', 'li:nth-nested(n+100) { }');
+  await run(`li:nth-nested(n+${DEFAULT_MAX_DEPTH + 1}) { }`, `li:nth-nested(n+${DEFAULT_MAX_DEPTH + 1}) { }`);
 })
 
 it('should generate simpler syntax for 1 depth', async () => {
@@ -67,23 +69,23 @@ it('should generate selector n deep', async () => {
 })
 
 it('should generate selector for odd and even depth keywords', async () => {
-  await run('li:nth-nested(odd) { }', `li${expectedFormulaSelector(range(1, 99, 2))} { }`);
-  await run('li:nth-nested(even) { }', `li${expectedFormulaSelector(range(2, 98, 2))} { }`);
+  await run('li:nth-nested(odd) { }', `li${expectedFormulaSelector(range(1, DEFAULT_MAX_DEPTH, 2))} { }`);
+  await run('li:nth-nested(even) { }', `li${expectedFormulaSelector(range(2, DEFAULT_MAX_DEPTH, 2))} { }`);
 })
 
 it('should generate selector for positive An+B depth syntax', async () => {
-  await run('li:nth-nested(2n+1) { }', `li${expectedFormulaSelector(range(1, 99, 2))} { }`);
-  await run('li:nth-nested(n+3) { }', `li${expectedFormulaSelector(range(3, 99))} { }`);
+  await run('li:nth-nested(2n+1) { }', `li${expectedFormulaSelector(range(1, DEFAULT_MAX_DEPTH, 2))} { }`);
+  await run('li:nth-nested(n+3) { }', `li${expectedFormulaSelector(range(3, DEFAULT_MAX_DEPTH))} { }`);
 })
 
 it('should generate selector for signed and finite An+B depth syntax', async () => {
   await run('li:nth-nested(-n+3) { }', `li${expectedFirstDepthsSelector(3)} { }`);
   await run('li:nth-nested(-2n+5) { }', `li${expectedFormulaSelector([1, 3, 5])} { }`);
-  await run('li:nth-nested(+3n - 2) { }', `li${expectedFormulaSelector(range(1, 97, 3))} { }`);
+  await run('li:nth-nested(+3n - 2) { }', `li${expectedFormulaSelector(range(1, DEFAULT_MAX_DEPTH, 3))} { }`);
 })
 
 it('should collapse first-depth ranges into one upper-bound selector', async () => {
-  await run('li:nth-nested(n) { }', `li${expectedFirstDepthsSelector(99)} { }`);
+  await run('li:nth-nested(n) { }', `li${expectedFirstDepthsSelector(DEFAULT_MAX_DEPTH)} { }`);
   await run('.menu li:nth-nested(-n+3) { }', `.menu li${expectedFirstDepthsSelector(3, 'li', '.menu')} { }`);
   await run(':nth-nested(-n+3) { }', `${expectedFirstDepthsSelector(3, '')} { }`);
 })
@@ -155,7 +157,20 @@ it('should generate selector honouring nested nth-nested selectors. #silly!', as
   await run('.foo .bar:nth-nested(2) li:nth-nested(2) { }', `.foo .bar${firstReplacement} li${expectedDepthSelector(2, 'li', `.foo .bar${firstReplacement}`)} { }`);
 })
 
-it('should generate selector no more than 99 deep', async () => {
-  await run('li:nth-nested(99) { }', `li${expectedDepthSelector(99)} { }`);
-  await run('li:nth-nested(100) { }', 'li:nth-nested(100) { }'); // Over 99 deliberately ignored
+it('should generate selector no more than the default max depth', async () => {
+  await run(`li:nth-nested(${DEFAULT_MAX_DEPTH}) { }`, `li${expectedDepthSelector(DEFAULT_MAX_DEPTH)} { }`);
+  await run(`li:nth-nested(${DEFAULT_MAX_DEPTH + 1}) { }`, `li:nth-nested(${DEFAULT_MAX_DEPTH + 1}) { }`);
+})
+
+it('should allow max depth to be configured', async () => {
+  await run('li:nth-nested(75) { }', `li${expectedDepthSelector(75)} { }`, { maxDepth: 75 });
+  await run('li:nth-nested(76) { }', 'li:nth-nested(76) { }', { maxDepth: 75 });
+  await run('li:nth-nested(odd) { }', `li${expectedFormulaSelector(range(1, 9, 2))} { }`, { maxDepth: 9 });
+  await run('li:nth-nested(n) { }', `li${expectedFirstDepthsSelector(9)} { }`, { maxDepth: 9 });
+})
+
+it('should ignore invalid max depth options', async () => {
+  await run(`li:nth-nested(${DEFAULT_MAX_DEPTH}) { }`, `li${expectedDepthSelector(DEFAULT_MAX_DEPTH)} { }`, null);
+  await run(`li:nth-nested(${DEFAULT_MAX_DEPTH}) { }`, `li${expectedDepthSelector(DEFAULT_MAX_DEPTH)} { }`, { maxDepth: 0 });
+  await run(`li:nth-nested(${DEFAULT_MAX_DEPTH + 1}) { }`, `li:nth-nested(${DEFAULT_MAX_DEPTH + 1}) { }`, { maxDepth: '75' });
 })

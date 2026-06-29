@@ -1,8 +1,16 @@
 const selectorParser = require("postcss-selector-parser");
 
 const NTH_NESTED_PSEUDO = ":nth-nested";
-const MAX_DEPTH = 50;
+const DEFAULT_MAX_DEPTH = 20;
 const RECURSION_LIMIT = 5;
+
+// Keeps the public option narrow: maxDepth must be a positive integer, and
+// invalid values fall back to the built-in cap.
+function getMaxDepth(opts) {
+  return opts && Number.isInteger(opts.maxDepth) && opts.maxDepth > 0
+    ? opts.maxDepth
+    : DEFAULT_MAX_DEPTH;
+}
 
 // Normalizes nth-child-style input into an {a, b} formula so every supported
 // spelling can use the same depth-matching path.
@@ -17,7 +25,7 @@ function parseNthFormula(rawFormula) {
     return { a: 2, b: 0 };
   }
 
-  if (/^\+?\d{1,2}$/.test(rawFormula)) {
+  if (/^\+?\d+$/.test(rawFormula)) {
     return { a: 0, b: parseInt(rawFormula) };
   }
 
@@ -56,11 +64,11 @@ function doesFormulaMatchDepth(formula, depth) {
 }
 
 // Expands a formula into concrete depths because the generated CSS has to
-// enumerate depth selectors within the plugin's finite 1..99 range.
-function getDepthsForFormula(formula) {
+// enumerate depth selectors within the configured finite range.
+function getDepthsForFormula(formula, maxDepth) {
   const depths = [];
 
-  for (let depth = 1; depth <= MAX_DEPTH; depth++) {
+  for (let depth = 1; depth <= maxDepth; depth++) {
     if (doesFormulaMatchDepth(formula, depth)) {
       depths.push(depth);
     }
@@ -71,7 +79,7 @@ function getDepthsForFormula(formula) {
 
 // Validates that a parser node is a supported top-level :nth-nested(...) call
 // and leaves invalid or out-of-range syntax untouched.
-function getNthNestedDepths(pseudo) {
+function getNthNestedDepths(pseudo, maxDepth) {
   if (pseudo.value !== NTH_NESTED_PSEUDO || pseudo.nodes.length !== 1) {
     return null;
   }
@@ -82,7 +90,7 @@ function getNthNestedDepths(pseudo) {
     return null;
   }
 
-  const depths = getDepthsForFormula(formula);
+  const depths = getDepthsForFormula(formula, maxDepth);
 
   return depths.length ? depths : null;
 }
@@ -205,8 +213,8 @@ function parseReplacementNodes(replacementSelector) {
 /**
  * @type {import('postcss').PluginCreator}
  */
-module.exports = (/* opts = {} */) => {
-  // Work with options here
+module.exports = (opts = {}) => {
+  const maxDepth = getMaxDepth(opts);
 
   return {
     postcssPlugin: "postcss-nth-nested",
@@ -231,7 +239,9 @@ module.exports = (/* opts = {} */) => {
             ) {
               const node = selector.nodes[index];
               const depths =
-                node.type === "pseudo" ? getNthNestedDepths(node) : null;
+                node.type === "pseudo"
+                  ? getNthNestedDepths(node, maxDepth)
+                  : null;
 
               if (!depths) {
                 continue;
@@ -280,3 +290,4 @@ module.exports = (/* opts = {} */) => {
 };
 
 module.exports.postcss = true;
+module.exports.DEFAULT_MAX_DEPTH = DEFAULT_MAX_DEPTH;

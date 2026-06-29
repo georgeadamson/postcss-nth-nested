@@ -105,6 +105,36 @@ If your build tool uses a `postcss` field in `package.json`, use:
 }
 ```
 
+## Options
+
+### `maxDepth`
+
+Type: `number`
+
+Default: `20`
+
+Sets the highest nesting depth the plugin will generate selectors for. Values must be positive integers; invalid values fall back to the default.
+
+```js
+// postcss.config.js
+module.exports = {
+  plugins: [
+    require('postcss-nth-nested')({ maxDepth: 75 })
+  ]
+};
+```
+
+```js
+// postcss.config.mjs
+import nthNested from 'postcss-nth-nested';
+
+export default {
+  plugins: [
+    nthNested({ maxDepth: 75 })
+  ]
+};
+```
+
 ## Examples
 
 Select only the top-level list item:
@@ -189,15 +219,15 @@ Generated CSS:
 
 ## Supported syntax
 
-The plugin transforms `:nth-nested(...)` values that match one or more nesting depths from `1` to `50`.
+The plugin transforms `:nth-nested(...)` values that match one or more nesting depths from `1` to `20` by default.
 
 Supported values follow `:nth-child(...)`-style `An+B` syntax:
 
-- integers from `1` to `50`, such as `1`, `2`, or `50`
+- integers from `1` to `20`, such as `1`, `2`, or `20`
 - `odd` and `even`
 - `An+B` formulas, such as `2n+1`, `3n`, `n+3`, `-n+3`, or `-2n+5`
 
-Depth is still capped at `50`. A formula that only matches depths outside that range is left unchanged.
+Depth is capped at `20` by default. A formula that only matches depths outside the configured range is left unchanged.
 
 Contiguous first-depth formulas such as `-n+3` are optimized to a single upper-bound selector instead of being expanded into every exact depth.
 
@@ -205,8 +235,8 @@ Invalid or unsupported forms are left unchanged:
 
 ```css
 li:nth-nested(0) {}
-li:nth-nested(51) {}
-li:nth-nested(n+51) {}
+li:nth-nested(21) {}
+li:nth-nested(n+21) {}
 li:nth-nested(a) {}
 li:nth-nested(1.5) {}
 ```
@@ -225,7 +255,7 @@ becomes:
 
 ## Selector size warning
 
-Broad `An+B` formulas can generate very large selectors because the plugin expands every matching depth up to `50`. Contiguous first-depth formulas such as `-n+3` are optimized, but formulas like `:nth-nested(odd)` still expand to every odd depth up to `50`. Prefer exact depths or narrow finite formulas when possible, and check the generated CSS size before using broad formulas in production.
+Broad `An+B` formulas can generate very large selectors because the plugin expands every matching depth up to the configured `maxDepth`. Contiguous first-depth formulas such as `-n+3` are optimized, but formulas like `:nth-nested(odd)` still expand to every odd depth up to `maxDepth`. Prefer exact depths or narrow finite formulas when possible, and check the generated CSS size before using broad formulas in production.
 
 ## Browser support
 
