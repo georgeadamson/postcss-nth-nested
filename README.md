@@ -166,7 +166,7 @@ li:nth-nested(-n+3) > .text {
 Generated CSS:
 
 ```css
-li:is(:where(:not(li li)), :where(li li:not(li li li)), :where(li li li:not(li li li li))) > .text {
+li:where(:not(li li li li)) > .text {
   color: rebeccapurple;
 }
 ```
@@ -189,22 +189,24 @@ Generated CSS:
 
 ## Supported syntax
 
-The plugin transforms `:nth-nested(...)` values that match one or more nesting depths from `1` to `99`.
+The plugin transforms `:nth-nested(...)` values that match one or more nesting depths from `1` to `50`.
 
 Supported values follow `:nth-child(...)`-style `An+B` syntax:
 
-- integers from `1` to `99`, such as `1`, `2`, or `99`
+- integers from `1` to `50`, such as `1`, `2`, or `50`
 - `odd` and `even`
 - `An+B` formulas, such as `2n+1`, `3n`, `n+3`, `-n+3`, or `-2n+5`
 
-Depth is still capped at `99`. A formula that only matches depths outside that range is left unchanged.
+Depth is still capped at `50`. A formula that only matches depths outside that range is left unchanged.
+
+Contiguous first-depth formulas such as `-n+3` are optimized to a single upper-bound selector instead of being expanded into every exact depth.
 
 Invalid or unsupported forms are left unchanged:
 
 ```css
 li:nth-nested(0) {}
-li:nth-nested(100) {}
-li:nth-nested(n+100) {}
+li:nth-nested(51) {}
+li:nth-nested(n+51) {}
 li:nth-nested(a) {}
 li:nth-nested(1.5) {}
 ```
@@ -223,7 +225,7 @@ becomes:
 
 ## Selector size warning
 
-Broad `An+B` formulas can generate very large selectors because the plugin expands every matching depth up to `99`. For example, `:nth-nested(odd)` expands to every odd depth from `1` through `99`. Prefer exact depths or narrow finite formulas when possible, and check the generated CSS size before using broad formulas in production.
+Broad `An+B` formulas can generate very large selectors because the plugin expands every matching depth up to `50`. Contiguous first-depth formulas such as `-n+3` are optimized, but formulas like `:nth-nested(odd)` still expand to every odd depth up to `50`. Prefer exact depths or narrow finite formulas when possible, and check the generated CSS size before using broad formulas in production.
 
 ## Browser support
 

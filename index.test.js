@@ -25,6 +25,13 @@ function expectedFormulaSelector(depths, nodeSelector, containerSelector) {
   return `:is(${depths.map((depth) => expectedDepthSelector(depth, nodeSelector, containerSelector)).join(', ')})`;
 }
 
+function expectedFirstDepthsSelector(lastDepth, nodeSelector = 'li', containerSelector = '') {
+  const node = nodeSelector || '*';
+  const oneLevelTooDeepSelector = `${node} `.repeat(lastDepth + 1);
+
+  return `:where(:not(${`${containerSelector} ${oneLevelTooDeepSelector}`.trim()}))`;
+}
+
 function range(from, to, step = 1) {
   const values = [];
 
@@ -70,9 +77,15 @@ it('should generate selector for positive An+B depth syntax', async () => {
 })
 
 it('should generate selector for signed and finite An+B depth syntax', async () => {
-  await run('li:nth-nested(-n+3) { }', `li${expectedFormulaSelector([1, 2, 3])} { }`);
+  await run('li:nth-nested(-n+3) { }', `li${expectedFirstDepthsSelector(3)} { }`);
   await run('li:nth-nested(-2n+5) { }', `li${expectedFormulaSelector([1, 3, 5])} { }`);
   await run('li:nth-nested(+3n - 2) { }', `li${expectedFormulaSelector(range(1, 97, 3))} { }`);
+})
+
+it('should collapse first-depth ranges into one upper-bound selector', async () => {
+  await run('li:nth-nested(n) { }', `li${expectedFirstDepthsSelector(99)} { }`);
+  await run('.menu li:nth-nested(-n+3) { }', `.menu li${expectedFirstDepthsSelector(3, 'li', '.menu')} { }`);
+  await run(':nth-nested(-n+3) { }', `${expectedFirstDepthsSelector(3, '')} { }`);
 })
 
 it('should generate selector for zero coefficient An+B depth syntax', async () => {

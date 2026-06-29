@@ -1,7 +1,7 @@
 const selectorParser = require("postcss-selector-parser");
 
 const NTH_NESTED_PSEUDO = ":nth-nested";
-const MAX_DEPTH = 99;
+const MAX_DEPTH = 50;
 const RECURSION_LIMIT = 5;
 
 // Normalizes nth-child-style input into an {a, b} formula so every supported
@@ -137,6 +137,37 @@ function buildDepthReplacementSelector(containerSelector, nodeSelector, depth) {
   return `:where(:not(${tooDeepInContainer}))`;
 }
 
+// Collapses "first N" depth ranges into one upper-bound selector, avoiding the
+// large :is(...) lists that formulas such as -n+3 would otherwise generate.
+function buildFirstDepthsReplacementSelector(
+  containerSelector,
+  nodeSelector,
+  lastDepth,
+) {
+  const node = nodeSelector || "*";
+  const oneLevelTooDeepSelector = `${node} `.repeat(lastDepth + 1);
+  const tooDeepInContainer =
+    `${containerSelector} ${oneLevelTooDeepSelector}`.trim();
+
+  return `:where(:not(${tooDeepInContainer}))`;
+}
+
+// Identifies depth ranges equivalent to "first N" so they can be represented
+// as "not one level too deep" instead of enumerating every exact depth.
+function getFirstDepthsLimit(depths) {
+  if (!depths.length || depths[0] !== 1) {
+    return null;
+  }
+
+  for (let index = 1; index < depths.length; index++) {
+    if (depths[index] !== depths[index - 1] + 1) {
+      return null;
+    }
+  }
+
+  return depths[depths.length - 1];
+}
+
 // Keeps single-depth output compact and only wraps in :is(...) when a formula
 // expands to multiple depth alternatives.
 function buildReplacementSelector(containerSelector, nodeSelector, depths) {
@@ -145,6 +176,16 @@ function buildReplacementSelector(containerSelector, nodeSelector, depths) {
       containerSelector,
       nodeSelector,
       depths[0],
+    );
+  }
+
+  const firstDepthsLimit = getFirstDepthsLimit(depths);
+
+  if (firstDepthsLimit) {
+    return buildFirstDepthsReplacementSelector(
+      containerSelector,
+      nodeSelector,
+      firstDepthsLimit,
     );
   }
 

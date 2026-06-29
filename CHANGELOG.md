@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Kept generated `:not(...)` depth guards inside `:where(...)` so ancestry checks remain low-specificity.
+- Optimized contiguous first-depth formulas such as `:nth-nested(-n+3)` into a single upper-bound selector.
 
 ## [1.1.3] - 2026-06-24
 
