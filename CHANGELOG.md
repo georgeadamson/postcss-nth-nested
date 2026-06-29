@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Added support for `:nth-child(...)`-style `An+B` syntax in `:nth-nested(...)`, including `odd`, `even`, positive formulas, and finite negative formulas.
+- Added browser demo presets for odd depths and the first three nesting depths.
+
+### Changed
+
+- Kept generated `:not(...)` depth guards inside `:where(...)` so ancestry checks remain low-specificity.
+
 ## [1.1.3] - 2026-06-24
 
 ### Changed

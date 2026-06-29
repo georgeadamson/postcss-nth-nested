@@ -21,6 +21,9 @@
     "nested-lists",
     "depth",
     "dom-depth",
+    "descendent",
+    "descendent-depth",
+    "descendent-level",
     "tree",
     "menu"
   ],

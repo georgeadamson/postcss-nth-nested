@@ -39,6 +39,16 @@
   border-color: #7b4cc2;
   color: #36205e;
 }`,
+                'odd': `li:nth-nested(2n+1) > .text {
+  background-color: #d8c8ff;
+  border-color: #7b4cc2;
+  color: #36205e;
+}`,
+                'first-three': `li:nth-nested(-n+3) > .text {
+  background-color: #ffe6a7;
+  border-color: #a56d00;
+  color: #5f3b00;
+}`,
                 'container': `.container2 li.item:nth-nested(4) > .text {
   background-color: #bdeee8;
   border-color: #16736b;
@@ -112,11 +122,12 @@
                 <header class="header">
                     <div>
                         <h1>postcss-nth-nested</h1>
-                        <p class="subtitle">A PostCSS playground for transforming <code>:nth-nested(n)</code> into CSS selectors that target exact nesting depth.</p>
+                        <p class="subtitle">A PostCSS playground for transforming <code>:nth-nested(...)</code> into CSS selectors that target exact nesting depths and An+B depth patterns.</p>
                     </div>
                     <div class="meta" aria-label="Package details">
                         <span class="pill">PostCSS 8</span>
                         <span class="pill">Depth 1-99</span>
+                        <span class="pill">An+B syntax</span>
                         <span class="pill">Build-time transform</span>
                     </div>
                 </header>
@@ -131,6 +142,8 @@
                             <button class="example-button" type="button" data-example="depth-1">Depth 1</button>
                             <button class="example-button" type="button" data-example="depth-2">Depth 2</button>
                             <button class="example-button" type="button" data-example="depth-3">Depth 3</button>
+                            <button class="example-button" type="button" data-example="odd">Odd depths</button>
+                            <button class="example-button" type="button" data-example="first-three">First 3</button>
                             <button class="example-button" type="button" data-example="container">Container</button>
                             <button class="example-button" type="button" data-example="classes">Tag + class</button>
                             <button class="example-button" type="button" data-example="wildcard">Wildcard scope</button>
